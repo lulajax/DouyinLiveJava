@@ -22,7 +22,7 @@ DouyinLiveJava/
 ├── client/          # 客户端库：连接 / 解析 / 事件
 │   └── src/main/proto/douyin.proto   # 抖音 webcast protobuf 定义
 └── examples/        # 使用示例（独立模块，依赖 client）
-    └── .../examples/{ChatPrinter,Authenticated,RawMessage}Example
+    └── .../examples/{ChatPrinter,Authenticated,RawMessage,StatusThenConnect}Example
 ```
 
 ## 签名服务接口契约
@@ -44,6 +44,17 @@ DouyinLiveJava/
 }
 ```
 > `liveId` 是 `live.douyin.com/{liveId}` 里的数字（web_rid）。签名 URL 有时效，断线重连应重新请求。
+
+另外两个端点：
+
+```
+GET /status?uid=<数字uid> 或 ?secUid=<sec_uid>
+  -> {"uid","secUid","nickname","live":true,"roomId":"..."}   // 查直播状态；live=false 时 roomId 为 null
+
+GET /sign?roomId=<room_id>  或 POST /sign {"roomId":"..."}
+  -> 同 /sign 响应（room_id 直连，跳过进房、无需 web_rid）
+```
+> 典型流程：`/status` 拿 `roomId` → `/sign?roomId=` 拿 `wssUrl` → 连接（不依赖 web_rid）。
 
 ## 快速开始
 
@@ -68,6 +79,18 @@ client.addListener(new DouyinLiveListener() {
     @Override public void onUnknown(String method, ByteString payload) { /* 自行解析其它消息 */ }
 });
 client.connect();
+```
+
+### 先查直播状态，再用 room_id 直连
+
+```java
+SignClient sign = new SignClient("http://localhost:18080");
+StatusResult st = sign.statusBySecUid("MS4w...");   // 或 sign.statusByUid("<数字uid>")
+if (st.live) {
+    DouyinLiveClient client = DouyinLiveClient.byRoomId(st.roomId, "http://localhost:18080");
+    client.addListener(/* ... */);
+    client.connect();   // room_id 直连，无需 web_rid
+}
 ```
 
 ## 支持的事件
