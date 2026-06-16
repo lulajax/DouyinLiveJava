@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>com.douyinlive</groupId>
+    <artifactId>douyin-live-parent</artifactId>
+    <version>1.0.0</version>
+  </parent>
+
+  <artifactId>douyin-live-examples</artifactId>
+  <packaging>jar</packaging>
+  <description>douyin-live-client 的使用示例（独立模块，不污染库）</description>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.douyinlive</groupId>
+      <artifactId>douyin-live-client</artifactId>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <finalName>douyin-live-examples</finalName>
+    <plugins>
+      <!-- 打 fat jar，默认入口为弹幕打印示例；其它示例用 java -cp 指定类名运行 -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>3.5.0</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+            <configuration>
+              <transformers>
+                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                  <mainClass>com.douyinlive.examples.ChatPrinterExample</mainClass>
+                </transformer>
+              </transformers>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>

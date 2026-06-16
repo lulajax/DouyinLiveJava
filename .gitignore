@@ -1,0 +1,10 @@
+# Java / Maven
+target/
+*.class
+dependency-reduced-pom.xml
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.DS_Store
