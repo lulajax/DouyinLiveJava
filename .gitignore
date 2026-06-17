@@ -8,3 +8,7 @@ dependency-reduced-pom.xml
 *.iml
 .vscode/
 .DS_Store
+
+# 本地配置（含登录态 Cookie，勿提交）
+.env
+logs/

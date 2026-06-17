@@ -2,11 +2,12 @@ package com.douyinlive.examples;
 
 import com.douyinlive.DouyinLiveClient;
 import com.douyinlive.event.ChatEvent;
-import com.douyinlive.event.DouyinLiveListener;
+import com.douyinlive.listener.DouyinLiveListener;
 import com.douyinlive.event.GiftEvent;
 import com.douyinlive.event.LikeEvent;
 import com.douyinlive.event.MemberEvent;
 import com.google.protobuf.ByteString;
+import io.github.cdimascio.dotenv.Dotenv;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -22,12 +23,14 @@ import java.util.concurrent.atomic.AtomicLong;
 public class RawMessageExample {
 
     public static void main(String[] args) throws Exception {
-        String liveId = args.length > 0 ? args[0] : "640801847218";
-        String signUrl = System.getenv().getOrDefault("SIGN_URL", "http://localhost:18080");
+        Dotenv env = Dotenv.configure().ignoreIfMissing().load();
+        String liveId = args.length > 0 ? args[0] : env.get("LIVE_ID", "640801847218");
+        String signUrl = env.get("SIGN_URL", "http://localhost:18080");
+        String cookie = env.get("DOUYIN_COOKIE", "");
 
         Map<String, AtomicLong> tally = new ConcurrentHashMap<>();
 
-        DouyinLiveClient client = new DouyinLiveClient(liveId, signUrl);
+        DouyinLiveClient client = new DouyinLiveClient(liveId, signUrl, cookie);
         client.addListener(new DouyinLiveListener() {
             @Override
             public void onConnect(String roomId, String title) {

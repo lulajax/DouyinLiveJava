@@ -1,5 +1,18 @@
-package com.douyinlive.event;
+package com.douyinlive.listener;
 
+import com.douyinlive.event.ChatEvent;
+import com.douyinlive.event.ControlEvent;
+import com.douyinlive.event.EmojiChatEvent;
+import com.douyinlive.event.FansclubEvent;
+import com.douyinlive.event.GiftComboEvent;
+import com.douyinlive.event.GiftEvent;
+import com.douyinlive.event.LikeEvent;
+import com.douyinlive.event.MemberEvent;
+import com.douyinlive.event.RoomMessageEvent;
+import com.douyinlive.event.RoomRankEvent;
+import com.douyinlive.event.RoomStatsEvent;
+import com.douyinlive.event.RoomUserSeqEvent;
+import com.douyinlive.event.SocialEvent;
 import com.google.protobuf.ByteString;
 
 /**
@@ -15,8 +28,12 @@ public interface DouyinLiveListener {
     default void onChat(ChatEvent event) {
     }
 
-    /** 礼物。 */
+    /** 礼物入账：仅在连击结算（repeatEnd==1）/单次礼物时回调一次，repeatCount 为本次连击总数。用于落库统计。 */
     default void onGift(GiftEvent event) {
+    }
+
+    /** 礼物连击进度：每条礼物消息都回调（含进行中与结算态，见 {@link GiftComboEvent#state()}），用于实时连击 UI。入账请用 {@link #onGift}。 */
+    default void onGiftCombo(GiftComboEvent event) {
     }
 
     /** 进房/成员。 */

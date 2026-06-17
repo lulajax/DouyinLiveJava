@@ -2,10 +2,11 @@ package com.douyinlive.examples;
 
 import com.douyinlive.DouyinLiveClient;
 import com.douyinlive.event.ChatEvent;
-import com.douyinlive.event.DouyinLiveListener;
+import com.douyinlive.listener.DouyinLiveListener;
 import com.douyinlive.event.GiftEvent;
 import com.douyinlive.event.LikeEvent;
 import com.douyinlive.event.MemberEvent;
+import io.github.cdimascio.dotenv.Dotenv;
 
 /**
  * 基础示例：连接直播间并打印弹幕/礼物/进房/点赞。
@@ -15,17 +16,21 @@ import com.douyinlive.event.MemberEvent;
  *        mvn -q -pl examples -am package
  *        java -jar examples/target/douyin-live-examples.jar 640801847218
  *
- * 环境变量 SIGN_URL 覆盖签名服务地址（默认 http://localhost:18080）。
+ * 配置（LIVE_ID / SIGN_URL / DOUYIN_COOKIE）从 .env 读取，缺失则回退到系统环境变量。
  */
 public class ChatPrinterExample {
 
     public static void main(String[] args) throws Exception {
-        String liveId = args.length > 0 ? args[0] : "640801847218";
-        String signUrl = System.getenv().getOrDefault("SIGN_URL", "http://localhost:18080");
+        Dotenv env = Dotenv.configure().ignoreIfMissing().load();
+        String liveId = args.length > 0 ? args[0] : env.get("LIVE_ID", "640801847218");
+        String signUrl = env.get("SIGN_URL", "http://localhost:18080");
+        String cookie = env.get("DOUYIN_COOKIE", "");
 
-        System.out.println("连接直播间 liveId=" + liveId + " 经签名服务 " + signUrl);
+        boolean authed = cookie != null && !cookie.isBlank();
+        System.out.println("连接直播间 liveId=" + liveId + " 经签名服务 " + signUrl
+                + (authed ? "  [登录态]" : "  [匿名]"));
 
-        DouyinLiveClient client = new DouyinLiveClient(liveId, signUrl);
+        DouyinLiveClient client = new DouyinLiveClient(liveId, signUrl, cookie);
         client.addListener(new DouyinLiveListener() {
             @Override
             public void onConnect(String roomId, String title) {

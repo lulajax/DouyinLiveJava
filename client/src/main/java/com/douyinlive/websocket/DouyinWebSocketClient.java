@@ -53,6 +53,11 @@ public class DouyinWebSocketClient extends WebSocketClient {
                     // 关闭中发送失败可忽略
                 }
             }
+            try {
+                router.onTick();   // 复用心跳调度做连击超时检查，避免额外线程
+            } catch (Exception ignore) {
+                // 兜底检查异常不影响心跳
+            }
         }, heartbeatIntervalMs, heartbeatIntervalMs, TimeUnit.MILLISECONDS);
     }
 
