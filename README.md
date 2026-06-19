@@ -2,7 +2,7 @@
 
 抖音直播弹幕采集 Java 客户端：连接抖音直播间 WebSocket、解析 protobuf 消息，以事件方式分发（弹幕 / 礼物 / 进房 / 点赞 / 榜单 / 在线人数 等）。设计参考 [TikTokLiveJava](https://github.com/jwdeveloper/TikTok-Live-Java)。
 
-> **本仓库不含任何平台签名算法实现。** 连接抖音 WSS 需要一个「签名服务」产出带签名的 URL，本客户端通过 HTTP 调用它（接口契约见下），签名服务需你自行提供。
+> **本仓库不含任何平台签名算法实现。** 连接抖音 WSS 需要一个「签名服务」产出带签名的 URL，本客户端通过 HTTP 调用它（接口契约见下）。签名服务可订阅托管的 [RapidAPI 网关](#如何获取签名服务订阅)（几分钟接入），也可自行提供。
 
 ## 架构
 
@@ -56,6 +56,25 @@ GET /sign?roomId=<room_id>  或 POST /sign {"roomId":"..."}
 ```
 > 典型流程：`/status` 拿 `roomId` → `/sign?roomId=` 拿 `wssUrl` → 连接（不依赖 web_rid）。
 
+## 如何获取签名服务（订阅）
+
+不想自建签名服务？直接订阅托管的 RapidAPI 网关即可，**几分钟接入**：
+
+1. 打开订阅页 → [douyin-api on RapidAPI](https://rapidapi.com/tikhub-team-tikhub-team-default/api/douyin-api6/playground/apiendpoint_eb93a5f4-3141-4018-9007-83807ee3bced) 选择套餐订阅；
+2. 在控制台复制你的 **X-RapidAPI-Key**；
+3. 填进项目根目录 `.env`（参考 `.env.example`）：`RAPIDAPI_KEY=你的Key`。
+
+接入方式由 `.env` 里的 key **自动推断**，改配置即切换，业务代码无需改动：
+
+| `.env` 中的 key | 接入方式 | baseUrl | 鉴权头 |
+|---|---|---|---|
+| `RAPIDAPI_KEY` 非空 | **RapidAPI 网关**（推荐·付费） | `https://douyin-api6.p.rapidapi.com` | `x-rapidapi-key` / `x-rapidapi-host` |
+| 留空 | 自建 / 本地 | `SIGN_URL`（默认 `http://localhost:18080`） | 无 |
+
+> 端点路径差异由 SDK 内部处理：RapidAPI 为 `/api/v1/douyin/sign`、`/api/v1/douyin/sign/status`；自建为 `/sign`、`/status`。
+
+代码里也可显式指定接入方式：`SignProvider.rapidApi("你的Key")`、`SignProvider.selfHosted("http://localhost:18080")`。
+
 ## 快速开始
 
 ```bash
@@ -71,7 +90,9 @@ java -cp examples/target/douyin-live-examples.jar com.douyinlive.examples.RawMes
 ## 作为库使用
 
 ```java
-DouyinLiveClient client = new DouyinLiveClient("640801847218", "http://localhost:18080");
+// 按 .env 自动选择接入方式（RapidAPI / 自建）；也可换成 SignProvider.rapidApi("你的Key")
+SignProvider provider = SignProvider.fromConfig(System::getenv);
+DouyinLiveClient client = new DouyinLiveClient("640801847218", provider);
 client.addListener(new DouyinLiveListener() {
     @Override public void onChat(ChatEvent e)     { System.out.println(e.user().nickname() + ": " + e.content()); }
     @Override public void onGift(GiftEvent e)     { /* ... */ }
@@ -84,10 +105,11 @@ client.connect();
 ### 先查直播状态，再用 room_id 直连
 
 ```java
-SignClient sign = new SignClient("http://localhost:18080");
+SignProvider provider = SignProvider.fromConfig(System::getenv);
+SignClient sign = new SignClient(provider);
 StatusResult st = sign.statusBySecUid("MS4w...");   // 或 sign.statusByUid("<数字uid>")
 if (st.live) {
-    DouyinLiveClient client = DouyinLiveClient.byRoomId(st.roomId, "http://localhost:18080");
+    DouyinLiveClient client = DouyinLiveClient.byRoomId(st.roomId, provider);
     client.addListener(/* ... */);
     client.connect();   // room_id 直连，无需 web_rid
 }
@@ -118,7 +140,7 @@ if (st.live) {
 匿名连接能收到大部分弹幕；通过签名服务传入登录态 Cookie（尤其 `sessionid`）可收到更完整的事件。客户端侧：
 
 ```java
-new DouyinLiveClient(liveId, signUrl, "sessionid=xxx; ...");   // 或环境变量 DOUYIN_COOKIE
+new DouyinLiveClient(liveId, provider, "sessionid=xxx; ...");   // provider 见上；Cookie 也可走环境变量 DOUYIN_COOKIE
 ```
 > Cookie 是敏感登录凭证，请勿提交进代码库。
 

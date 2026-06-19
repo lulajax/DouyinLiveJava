@@ -7,7 +7,7 @@ public class SignResult {
     public String liveId;
     public String roomId;
     public String title;
-    public int status;       // 2 = 直播中
+    public int status;       // 直播状态码（不同签名服务取值可能不同，连接逻辑不依赖此字段）
     public Long userCount;
     public String wssUrl;
     public Map<String, String> headers;   // 连接 WSS 需要的请求头：User-Agent / Cookie

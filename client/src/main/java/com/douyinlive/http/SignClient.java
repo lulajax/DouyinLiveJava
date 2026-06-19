@@ -19,13 +19,19 @@ import java.util.Map;
  */
 public class SignClient {
 
-    private final String baseUrl;
+    private final SignProvider provider;
     private final HttpClient http;
     private final Gson gson = new Gson();
 
-    public SignClient(String baseUrl) {
-        this.baseUrl = baseUrl.endsWith("/") ? baseUrl.substring(0, baseUrl.length() - 1) : baseUrl;
+    /** 以接入方式构造，推荐用 {@link SignProvider#fromConfig} / {@link SignProvider#rapidApi} 等工厂获取 provider。 */
+    public SignClient(SignProvider provider) {
+        this.provider = provider;
         this.http = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build();
+    }
+
+    /** 向后兼容：直接以 baseUrl 构造，等价于自建/本地无鉴权接入。 */
+    public SignClient(String baseUrl) {
+        this(SignProvider.selfHosted(baseUrl));
     }
 
     /** 用 liveId(web_rid) 签名（经进房接口取 room_id 与元数据）。 */
@@ -53,14 +59,14 @@ public class SignClient {
     }
 
     private SignResult postSign(Map<String, String> payload) throws Exception {
-        HttpRequest req = HttpRequest.newBuilder(URI.create(baseUrl + "/sign"))
+        HttpRequest.Builder builder = HttpRequest.newBuilder(URI.create(provider.baseUrl() + provider.signPath()))
                 .timeout(Duration.ofSeconds(20))
                 .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(gson.toJson(payload), StandardCharsets.UTF_8))
-                .build();
-        HttpResponse<String> resp = http.send(req, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+                .POST(HttpRequest.BodyPublishers.ofString(gson.toJson(payload), StandardCharsets.UTF_8));
+        provider.authHeaders().forEach(builder::header);
+        HttpResponse<String> resp = http.send(builder.build(), HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
         if (resp.statusCode() != 200) {
-            throw new RuntimeException("签名服务返回 " + resp.statusCode() + ": " + resp.body());
+            throw new RuntimeException("签名服务返回 " + resp.statusCode() + ": " + resp.body() + authHint(resp.statusCode()));
         }
         SignResult result = gson.fromJson(resp.body(), SignResult.class);
         if (result == null || result.wssUrl == null) {
@@ -80,19 +86,28 @@ public class SignClient {
     }
 
     private StatusResult queryStatus(String key, String value) throws Exception {
-        String url = baseUrl + "/status?" + key + "=" + URLEncoder.encode(value, StandardCharsets.UTF_8);
-        HttpRequest req = HttpRequest.newBuilder(URI.create(url))
+        String url = provider.baseUrl() + provider.statusPath()
+                + "?" + key + "=" + URLEncoder.encode(value, StandardCharsets.UTF_8);
+        HttpRequest.Builder builder = HttpRequest.newBuilder(URI.create(url))
                 .timeout(Duration.ofSeconds(20))
-                .GET()
-                .build();
-        HttpResponse<String> resp = http.send(req, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+                .GET();
+        provider.authHeaders().forEach(builder::header);
+        HttpResponse<String> resp = http.send(builder.build(), HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
         if (resp.statusCode() != 200) {
-            throw new RuntimeException("状态查询返回 " + resp.statusCode() + ": " + resp.body());
+            throw new RuntimeException("状态查询返回 " + resp.statusCode() + ": " + resp.body() + authHint(resp.statusCode()));
         }
         StatusResult result = gson.fromJson(resp.body(), StatusResult.class);
         if (result == null) {
             throw new RuntimeException("状态查询返回异常: " + resp.body());
         }
         return result;
+    }
+
+    /** 鉴权失败（401/403）时附加接入方式的引导文案。 */
+    private String authHint(int statusCode) {
+        if ((statusCode == 401 || statusCode == 403) && provider.authErrorHint() != null) {
+            return "\n" + provider.authErrorHint();
+        }
+        return "";
     }
 }

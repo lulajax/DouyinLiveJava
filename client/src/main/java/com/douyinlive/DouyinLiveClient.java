@@ -2,6 +2,7 @@ package com.douyinlive;
 
 import com.douyinlive.listener.DouyinLiveListener;
 import com.douyinlive.http.SignClient;
+import com.douyinlive.http.SignProvider;
 import com.douyinlive.http.SignResult;
 import com.douyinlive.mapper.MessageRouter;
 import com.douyinlive.websocket.DouyinWebSocketClient;
@@ -16,7 +17,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
  *   2. 用 Java-WebSocket 连接、解析 protobuf、分发事件。
  *
  * 用法：
- *   var client = new DouyinLiveClient("640801847218", "http://localhost:18080");
+ *   var provider = SignProvider.fromConfig(System::getenv);   // 按配置自动选 RapidAPI / 自建
+ *   var client = new DouyinLiveClient("640801847218", provider);
  *   client.addListener(new DouyinLiveListener(){ ... });
  *   client.connect();
  */
@@ -31,29 +33,49 @@ public class DouyinLiveClient {
     private volatile DouyinWebSocketClient ws;
     private volatile SignResult lastSign;
 
-    private DouyinLiveClient(String liveId, String roomId, String signServiceUrl, String cookie) {
+    private DouyinLiveClient(String liveId, String roomId, SignProvider provider, String cookie) {
         this.liveId = liveId;
         this.roomId = roomId;
         this.cookie = cookie;
-        this.signClient = new SignClient(signServiceUrl);
+        this.signClient = new SignClient(provider);
     }
 
-    public DouyinLiveClient(String liveId, String signServiceUrl) {
-        this(liveId, null, signServiceUrl, null);
+    // ===== 以接入方式（SignProvider）构造，推荐用 SignProvider.fromConfig / rapidApi 等工厂 =====
+
+    public DouyinLiveClient(String liveId, SignProvider provider) {
+        this(liveId, null, provider, null);
     }
 
     /** @param cookie 可选登录态 Cookie 串（"sessionid=...; ..."），传入可收到更完整的弹幕/事件。 */
-    public DouyinLiveClient(String liveId, String signServiceUrl, String cookie) {
-        this(liveId, null, signServiceUrl, cookie);
+    public DouyinLiveClient(String liveId, SignProvider provider, String cookie) {
+        this(liveId, null, provider, cookie);
     }
 
     /** room_id 直连：配合 SignClient.statusBySecUid/statusByUid 拿到的 roomId 使用（无需 web_rid）。 */
+    public static DouyinLiveClient byRoomId(String roomId, SignProvider provider) {
+        return new DouyinLiveClient(null, roomId, provider, null);
+    }
+
+    public static DouyinLiveClient byRoomId(String roomId, SignProvider provider, String cookie) {
+        return new DouyinLiveClient(null, roomId, provider, cookie);
+    }
+
+    // ===== 向后兼容：直接以 baseUrl 构造，等价于自建/本地无鉴权接入 =====
+
+    public DouyinLiveClient(String liveId, String signServiceUrl) {
+        this(liveId, null, SignProvider.selfHosted(signServiceUrl), null);
+    }
+
+    public DouyinLiveClient(String liveId, String signServiceUrl, String cookie) {
+        this(liveId, null, SignProvider.selfHosted(signServiceUrl), cookie);
+    }
+
     public static DouyinLiveClient byRoomId(String roomId, String signServiceUrl) {
-        return new DouyinLiveClient(null, roomId, signServiceUrl, null);
+        return new DouyinLiveClient(null, roomId, SignProvider.selfHosted(signServiceUrl), null);
     }
 
     public static DouyinLiveClient byRoomId(String roomId, String signServiceUrl, String cookie) {
-        return new DouyinLiveClient(null, roomId, signServiceUrl, cookie);
+        return new DouyinLiveClient(null, roomId, SignProvider.selfHosted(signServiceUrl), cookie);
     }
 
     public DouyinLiveClient addListener(DouyinLiveListener listener) {

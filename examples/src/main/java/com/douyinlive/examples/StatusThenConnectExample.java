@@ -6,6 +6,7 @@ import com.douyinlive.listener.DouyinLiveListener;
 import com.douyinlive.event.GiftEvent;
 import com.douyinlive.event.MemberEvent;
 import com.douyinlive.http.SignClient;
+import com.douyinlive.http.SignProvider;
 import com.douyinlive.http.StatusResult;
 import io.github.cdimascio.dotenv.Dotenv;
 
@@ -20,13 +21,13 @@ public class StatusThenConnectExample {
 
     public static void main(String[] args) throws Exception {
         Dotenv env = Dotenv.configure().ignoreIfMissing().load();
-        String signUrl = env.get("SIGN_URL", "http://localhost:18080");
+        SignProvider provider = SignProvider.fromConfig(env::get);   // 按配置自动选 RapidAPI / 自建
         String cookie = env.get("DOUYIN_COOKIE", "");
         String secUid = args.length > 0 ? args[0]
                 : env.get("SEC_UID", "MS4wLjABAAAA7rOkPwkReCsi5xr42lOi3d8s7hs_4WadleWvQkEwLjw");
 
         // 1. 查直播状态（uid 也可用 sign.statusByUid(uid)）
-        SignClient sign = new SignClient(signUrl);
+        SignClient sign = new SignClient(provider);
         StatusResult st = sign.statusBySecUid(secUid);
         System.out.println("主播 " + st.nickname + " | 在播=" + st.live + " | roomId=" + st.roomId);
         if (!st.live) {
@@ -35,7 +36,7 @@ public class StatusThenConnectExample {
         }
 
         // 2. 用 status 拿到的 room_id 直连（无需 web_rid）
-        DouyinLiveClient client = DouyinLiveClient.byRoomId(st.roomId, signUrl, cookie);
+        DouyinLiveClient client = DouyinLiveClient.byRoomId(st.roomId, provider, cookie);
         client.addListener(new DouyinLiveListener() {
             @Override
             public void onConnect(String roomId, String title) {
