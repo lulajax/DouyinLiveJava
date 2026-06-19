@@ -1,6 +1,13 @@
-# DouyinLiveJava
+# DouyinLiveJava — 抖音直播弹幕采集 Java SDK
+
+[![Stars](https://img.shields.io/github/stars/lulajax/DouyinLiveJava?style=social)](https://github.com/lulajax/DouyinLiveJava/stargazers)
+[![License](https://img.shields.io/github/license/lulajax/DouyinLiveJava)](LICENSE)
+[![Java](https://img.shields.io/badge/Java-17%2B-orange)](https://www.oracle.com/java/)
+[![Last commit](https://img.shields.io/github/last-commit/lulajax/DouyinLiveJava)](https://github.com/lulajax/DouyinLiveJava/commits)
 
 抖音直播弹幕采集 Java 客户端：连接抖音直播间 WebSocket、解析 protobuf 消息，以事件方式分发（弹幕 / 礼物 / 进房 / 点赞 / 榜单 / 在线人数 等）。设计参考 [TikTokLiveJava](https://github.com/jwdeveloper/TikTok-Live-Java)。
+
+> **关键词 / Keywords**：抖音弹幕、抖音直播、弹幕采集、弹幕抓取、直播弹幕、抖音直播间消息、douyin live、douyin danmaku、barrage / bullet-screen、live chat crawler、webcast、Java SDK。
 
 > **本仓库不含任何平台签名算法实现。** 连接抖音 WSS 需要一个「签名服务」产出带签名的 URL，本客户端通过 HTTP 调用它（接口契约见下）。签名服务可订阅托管的 [RapidAPI 网关](#如何获取签名服务订阅)（几分钟接入），也可自行提供。
 
