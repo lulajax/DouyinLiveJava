@@ -1,0 +1,3 @@
+# JitPack 构建配置：本项目为 Java 17，需显式指定 JDK，否则 JitPack 默认 JDK 可能导致构建失败。
+jdk:
+  - openjdk17

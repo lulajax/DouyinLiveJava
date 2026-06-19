@@ -94,6 +94,38 @@ java -jar examples/target/douyin-live-examples.jar 640801847218
 java -cp examples/target/douyin-live-examples.jar com.douyinlive.examples.RawMessageExample 640801847218
 ```
 
+## 用 JitPack 引入依赖
+
+[![JitPack](https://jitpack.io/v/lulajax/DouyinLiveJava.svg)](https://jitpack.io/#lulajax/DouyinLiveJava)
+
+无需手动构建，通过 [JitPack](https://jitpack.io/#lulajax/DouyinLiveJava) 直接引入 `douyin-live-client`：
+
+**Maven** —— 先加仓库，再加依赖（注意多模块仓库 groupId 形如 `com.github.用户.仓库`）：
+
+```xml
+<repositories>
+  <repository>
+    <id>jitpack.io</id>
+    <url>https://jitpack.io</url>
+  </repository>
+</repositories>
+
+<dependency>
+  <groupId>com.github.lulajax.DouyinLiveJava</groupId>
+  <artifactId>douyin-live-client</artifactId>
+  <version>v1.0.0</version>
+</dependency>
+```
+
+**Gradle**：
+
+```groovy
+repositories { maven { url 'https://jitpack.io' } }
+dependencies { implementation 'com.github.lulajax.DouyinLiveJava:douyin-live-client:v1.0.0' }
+```
+
+> 版本号用 [Release](https://github.com/lulajax/DouyinLiveJava/releases) 的 tag（如 `v1.0.0`），也可用 `main-SNAPSHOT` 取主分支最新构建。
+
 ## 作为库使用
 
 ```java
