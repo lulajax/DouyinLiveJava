@@ -19,4 +19,5 @@ public class StatusResult {
     public Integer payGradeLevel;  // 财富等级
     public Integer fansClubLevel;  // 粉丝团等级
     public String fansClubName;    // 粉丝团名称
+    public String webRid;          // 直播间短号（拼 live.douyin.com/{webRid}），来自 profile/other 的 room_data.owner.web_rid
 }
