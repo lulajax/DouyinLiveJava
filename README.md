@@ -5,6 +5,8 @@
 [![Java](https://img.shields.io/badge/Java-17%2B-orange)](https://www.oracle.com/java/)
 [![Last commit](https://img.shields.io/github/last-commit/lulajax/DouyinLiveJava)](https://github.com/lulajax/DouyinLiveJava/commits)
 
+**简体中文** | [English](README.en.md)
+
 抖音直播弹幕采集 Java 客户端：连接抖音直播间 WebSocket、解析 protobuf 消息，以事件方式分发（弹幕 / 礼物 / 进房 / 点赞 / 榜单 / 在线人数 等）。设计参考 [TikTokLiveJava](https://github.com/jwdeveloper/TikTok-Live-Java)。
 
 > **关键词 / Keywords**：抖音弹幕、抖音直播、弹幕采集、弹幕抓取、直播弹幕、抖音直播间消息、douyin live、douyin danmaku、barrage / bullet-screen、live chat crawler、webcast、Java SDK。
