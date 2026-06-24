@@ -67,7 +67,7 @@ GET /sign?roomId=<room_id>  或 POST /sign {"roomId":"..."}
 
 不想自建签名服务？直接订阅托管的 RapidAPI 网关即可，**几分钟接入**：
 
-1. 打开订阅页 → [douyin-api on RapidAPI](https://rapidapi.com/tikhub-team-tikhub-team-default/api/douyin-api6/playground/apiendpoint_eb93a5f4-3141-4018-9007-83807ee3bced) 选择套餐订阅；
+1. 打开订阅页 → [douyin-sign-api on RapidAPI](https://rapidapi.com/tikhub-team-tikhub-team-default/api/douyin-sign-api/playground/apiendpoint_4a3adc62-7f1a-4bed-9df2-cf14b34e2837) 选择套餐订阅；
 2. 在控制台复制你的 **X-RapidAPI-Key**；
 3. 填进项目根目录 `.env`（参考 `.env.example`）：`RAPIDAPI_KEY=你的Key`。
 
@@ -75,7 +75,7 @@ GET /sign?roomId=<room_id>  或 POST /sign {"roomId":"..."}
 
 | `.env` 中的 key | 接入方式 | baseUrl | 鉴权头 |
 |---|---|---|---|
-| `RAPIDAPI_KEY` 非空 | **RapidAPI 网关**（推荐·付费） | `https://douyin-api6.p.rapidapi.com` | `x-rapidapi-key` / `x-rapidapi-host` |
+| `RAPIDAPI_KEY` 非空 | **RapidAPI 网关**（推荐·付费） | `https://douyin-sign-api.p.rapidapi.com` | `x-rapidapi-key` / `x-rapidapi-host` |
 | 留空 | 自建 / 本地 | `SIGN_URL`（默认 `http://localhost:18080`） | 无 |
 
 > 端点路径差异由 SDK 内部处理：RapidAPI 为 `/api/v1/douyin/sign`、`/api/v1/douyin/sign/status`；自建为 `/sign`、`/status`。

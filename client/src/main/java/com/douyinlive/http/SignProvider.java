@@ -23,14 +23,14 @@ import java.util.function.Function;
  */
 public final class SignProvider {
 
-    // ===== RapidAPI 网关（douyin-api6, tikhub-team）真实参数 =====
+    // ===== RapidAPI 网关（douyin-sign-api, tikhub-team）真实参数 =====
     /** RapidAPI 网关地址。 */
-    public static final String RAPIDAPI_BASE_URL = "https://douyin-api6.p.rapidapi.com";
+    public static final String RAPIDAPI_BASE_URL = "https://douyin-sign-api.p.rapidapi.com";
     /** RapidAPI Host 头的值（与 baseUrl 域名一致）。 */
-    public static final String RAPIDAPI_HOST = "douyin-api6.p.rapidapi.com";
+    public static final String RAPIDAPI_HOST = "douyin-sign-api.p.rapidapi.com";
     /** RapidAPI 订阅页（鉴权失败时引导用户去订阅）。 */
     public static final String RAPIDAPI_LISTING_URL =
-            "https://rapidapi.com/tikhub-team-tikhub-team-default/api/douyin-api6/playground/apiendpoint_eb93a5f4-3141-4018-9007-83807ee3bced";
+            "https://rapidapi.com/tikhub-team-tikhub-team-default/api/douyin-sign-api/playground/apiendpoint_4a3adc62-7f1a-4bed-9df2-cf14b34e2837";
     /** RapidAPI 签名端点路径。 */
     public static final String RAPIDAPI_SIGN_PATH = "/api/v1/douyin/sign";
     /** RapidAPI 状态查询端点路径（注意是 /sign/status）。 */
